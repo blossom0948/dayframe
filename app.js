@@ -1,5 +1,6 @@
 const STORAGE_KEY = "dayframe-web-entries-v1";
 const THEME_KEY = "dayframe-web-theme-v1";
+const ONBOARDING_KEY = "dayframe-web-onboarding-v1";
 
 const TONE_BACKGROUNDS = {
   dawn: "linear-gradient(145deg, #f8d29b 0%, #ef9d92 45%, #6b78c7 100%)",
@@ -34,6 +35,7 @@ const state = {
   month: new Date(2026, 6, 1),
   query: "",
   sortAsc: false,
+  onboardingPage: 0,
   editorId: null,
   editorDraft: null,
 };
@@ -162,10 +164,37 @@ function render() {
   if (storedTheme === "dark") document.body.dataset.theme = "dark";
   else document.body.removeAttribute("data-theme");
 
+  const topbar = document.querySelector(".topbar");
+  const mobileNav = document.querySelector(".mobile-nav");
+  if (localStorage.getItem(ONBOARDING_KEY) !== "complete") {
+    topbar.hidden = true;
+    mobileNav.hidden = true;
+    viewRoot.innerHTML = renderOnboarding();
+    return;
+  }
+  topbar.hidden = false;
+  mobileNav.hidden = false;
   document.querySelector("#page-title").textContent = pageTitle();
   searchInput.value = state.query;
+  const topbarAction = document.querySelector("#topbar-action");
+  if (topbarAction) {
+    topbarAction.textContent = state.view === "calendar" ? "⚙" : state.view === "feed" ? "↕" : "◐";
+    topbarAction.setAttribute("aria-label", state.view === "calendar" ? "설정" : state.view === "feed" ? "정렬" : "테마 변경");
+    topbarAction.title = topbarAction.getAttribute("aria-label");
+    topbarAction.dataset.action = state.view === "feed" ? "sort-feed" : "toggle-theme";
+  }
   document.querySelectorAll("[data-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.view === state.view));
   viewRoot.innerHTML = state.view === "calendar" ? renderCalendar() : state.view === "feed" ? renderFeed() : state.view === "stats" ? renderStats() : renderArchive();
+}
+
+function renderOnboarding() {
+  const pages = [
+    ["▣", "오늘을 한 장으로", "사진 한 장과 짧은 문장으로 부담 없이 하루를 남겨보세요."],
+    ["▦", "달력으로 다시 만나요", "한 달의 기록을 달력과 피드로 빠르게 훑어볼 수 있어요."],
+    ["✦", "나만의 작은 아카이브", "기분과 음악을 더해 나중에 꺼내 볼 장면을 만드세요."],
+  ];
+  const [icon, title, description] = pages[state.onboardingPage];
+  return `<section class="onboarding"><button class="secondary-button onboarding-skip" data-action="onboarding-skip">나중에 설정</button><div class="onboarding-body"><div class="onboarding-icon onboarding-icon-${state.onboardingPage}">${icon}</div><strong class="onboarding-brand">하루한컷</strong><h1>${title}</h1><p>${description}</p><div class="onboarding-dots">${pages.map((_, index) => `<i class="${index === state.onboardingPage ? "is-active" : ""}"></i>`).join("")}</div></div><button class="primary-button onboarding-next" data-action="onboarding-next">${state.onboardingPage === pages.length - 1 ? "시작하기" : "다음"}</button></section>`;
 }
 
 function renderCalendar() {
@@ -173,7 +202,7 @@ function renderCalendar() {
   const cells = [];
   const year = state.month.getFullYear();
   const month = state.month.getMonth();
-  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+  const firstWeekday = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const previousMonthDays = new Date(year, month, 0).getDate();
   const totalCells = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
@@ -201,14 +230,13 @@ function renderCalendar() {
     </div>`);
   }
 
-  const recent = [...currentMonthEntries()].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
   return `<div class="view-heading">
     <div><h2>${esc(monthLabel())}</h2><p>사진 한 장씩 쌓아가는 나의 ${state.month.getMonth() + 1}월</p></div>
     <div class="heading-actions"><div class="month-switcher"><button data-action="previous-month" aria-label="이전 달">‹</button><span class="month-label">${esc(monthLabel())}</span><button data-action="next-month" aria-label="다음 달">›</button></div><button class="secondary-button" data-action="today">오늘</button></div>
   </div>
   <div class="overview-grid">
     <section class="card calendar-card" aria-label="${esc(monthLabel())} 달력">
-      <div class="weekdays">${["월", "화", "수", "목", "금", "토", "일"].map((day) => `<span class="weekday">${day}</span>`).join("")}</div>
+      <div class="weekdays">${["일", "월", "화", "수", "목", "금", "토"].map((day) => `<span class="weekday">${day}</span>`).join("")}</div>
       <div class="calendar-grid">${cells.join("")}</div>
     </section>
     <aside class="card progress-card">
@@ -216,7 +244,7 @@ function renderCalendar() {
       <div class="progress-ring" style="--progress:${progress.percent}%"></div>
     </aside>
   </div>
-  <section class="card section-card"><h3>최근에 남긴 장면</h3><p>카드를 눌러 이야기를 다시 읽어보세요.</p>${recent.length ? `<div class="feed-list">${recent.map(renderFeedCard).join("")}</div>` : emptyState("아직 이 달의 기록이 없어요", "오늘의 사진 한 장으로 첫 장면을 만들어 보세요.")}</section>`;
+  ${currentMonthEntries().length ? "" : emptyState("아직 이 달의 기록이 없어요", "오늘의 사진 한 장으로 첫 장면을 만들어 보세요.")}`;
 }
 
 function renderFeed() {
@@ -362,6 +390,15 @@ document.addEventListener("click", (event) => {
     state.view = view;
     render();
     return;
+  }
+  if (action === "onboarding-skip") {
+    localStorage.setItem(ONBOARDING_KEY, "complete");
+    return render();
+  }
+  if (action === "onboarding-next") {
+    if (state.onboardingPage >= 2) localStorage.setItem(ONBOARDING_KEY, "complete");
+    else state.onboardingPage += 1;
+    return render();
   }
   if (action === "new-entry") return openEditor();
   if (action === "previous-month") { state.month = new Date(state.month.getFullYear(), state.month.getMonth() - 1, 1); return render(); }

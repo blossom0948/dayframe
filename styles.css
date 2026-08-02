@@ -25,6 +25,21 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 
 .site-shell { width: min(100%, 480px); min-height: 100vh; margin: 0 auto; background: var(--background); box-shadow: 0 0 60px rgba(28, 39, 64, .14); }
 .main-panel { position: relative; display: flex; min-height: 100vh; flex-direction: column; }
+.topbar[hidden], .mobile-nav[hidden] { display: none; }
+.onboarding { display: flex; min-height: 100vh; flex-direction: column; padding: 24px 28px; background: var(--background); }
+.onboarding-skip { align-self: flex-end; min-height: 36px; }
+.onboarding-body { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.onboarding-icon { position: relative; display: grid; width: 190px; height: 190px; place-items: center; border-radius: 44px; background: var(--primary-container); color: var(--primary); font-size: 77px; font-weight: 400; line-height: 1; }
+.onboarding-icon-0 { font-size: 0; }
+.onboarding-icon-0::before { width: 82px; height: 58px; border: 5px solid var(--primary); border-radius: 12px; content: ""; }
+.onboarding-icon-0::after { position: absolute; width: 25px; height: 25px; border: 5px solid var(--primary); border-radius: 50%; content: ""; }
+.onboarding-brand { margin-top: 34px; font-size: 22px; letter-spacing: -.06em; }
+.onboarding-body h1 { margin: 19px 0 0; font-size: 23px; letter-spacing: -.06em; }
+.onboarding-body p { max-width: 315px; margin: 10px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.onboarding-dots { display: flex; gap: 8px; margin-top: 27px; }
+.onboarding-dots i { display: block; width: 8px; height: 8px; border-radius: 99px; background: var(--outline); }
+.onboarding-dots i.is-active { width: 24px; background: var(--primary); }
+.onboarding-next { width: 100%; min-height: 54px; margin-top: 24px; border-radius: 18px; font-size: 14px; }
 .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 22px 20px 12px; background: var(--background); }
 .topbar-copy { min-width: 0; }
 .eyebrow { display: block; color: var(--primary); font-size: 10px; font-weight: 800; letter-spacing: .16em; }
