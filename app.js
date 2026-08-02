@@ -151,7 +151,10 @@ function streaks() {
 }
 
 function pageTitle() {
-  return { calendar: "이번 달의 장면", feed: "기록 피드", stats: "나의 기록 리듬", archive: "보관함" }[state.view] || "이번 달의 장면";
+  if (state.view === "calendar") {
+    return `${new Intl.DateTimeFormat("en-US", { month: "short" }).format(state.month).toUpperCase()} ${state.month.getFullYear()}`;
+  }
+  return { feed: "기록 피드", stats: "나의 기록 리듬", archive: "보관함" }[state.view] || "이번 달의 장면";
 }
 
 function render() {
@@ -209,9 +212,8 @@ function renderCalendar() {
       <div class="calendar-grid">${cells.join("")}</div>
     </section>
     <aside class="card progress-card">
-      <div><span class="card-kicker">MONTHLY FRAME</span><h3>${progress.covered}일의 장면</h3><p>${progress.elapsed ? `지나온 ${progress.elapsed}일 중 ${progress.covered}일을 사진으로 남겼어요.` : "아직 시작 전인 달이에요. 미리 장면을 준비해 보세요."}</p></div>
-      <div class="progress-ring" style="--progress:${progress.percent}%"><strong>${progress.percent}%</strong><span>기록률</span></div>
-      <div class="progress-stats"><div><strong>${currentMonthEntries().length}</strong><span>이번 달</span></div><div><strong>${streaks().current}</strong><span>현재 연속</span></div><div><strong>${streaks().longest}</strong><span>최장 기록</span></div></div>
+      <div class="progress-copy"><div><h3>이번 달 기록</h3><strong class="progress-percent">${progress.percent}%</strong></div><p>${progress.elapsed ? `${progress.covered} / ${new Date(state.month.getFullYear(), state.month.getMonth() + 1, 0).getDate()}일을 사진으로 남겼어요.` : "오늘의 사진 한 장으로 첫 기록을 시작해 보세요."}</p></div>
+      <div class="progress-ring" style="--progress:${progress.percent}%"></div>
     </aside>
   </div>
   <section class="card section-card"><h3>최근에 남긴 장면</h3><p>카드를 눌러 이야기를 다시 읽어보세요.</p>${recent.length ? `<div class="feed-list">${recent.map(renderFeedCard).join("")}</div>` : emptyState("아직 이 달의 기록이 없어요", "오늘의 사진 한 장으로 첫 장면을 만들어 보세요.")}</section>`;
