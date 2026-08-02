@@ -1,0 +1,10 @@
+{
+  "name": "하루한컷 · Dayframe",
+  "short_name": "하루한컷",
+  "lang": "ko-KR",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#0b1020",
+  "description": "사진 한 장으로 하루를 남기는 로컬 우선 사진 일기"
+}
