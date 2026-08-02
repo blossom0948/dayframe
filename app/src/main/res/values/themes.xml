@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.Dayframe" parent="android:style/Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">@color/dayframe_blue</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/dayframe_background</item>
+    </style>
+</resources>
