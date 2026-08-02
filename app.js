@@ -1,6 +1,9 @@
-const STORAGE_KEY = "dayframe-web-entries-v1";
-const THEME_KEY = "dayframe-web-theme-v1";
+const STORAGE_KEY = "dayframe-web-entries-v2";
+const THEME_KEY = "dayframe-web-theme-v2";
 const ONBOARDING_KEY = "dayframe-web-onboarding-v1";
+
+const now = new Date();
+const DEFAULT_DATE = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
 const TONE_BACKGROUNDS = {
   dawn: "linear-gradient(145deg, #f8d29b 0%, #ef9d92 45%, #6b78c7 100%)",
@@ -21,18 +24,12 @@ const MOODS = [
 ];
 
 const seedEntries = [
-  { id: "seed-04", date: "2026-07-04", title: "풀밭에서 만난 오후", body: "잠깐 멈춰서 고양이와 햇빛을 나눠 가졌다.", mood: "평온", musicTitle: "Do the Dance", musicArtist: "아일릿", tone: "green", favorite: true },
-  { id: "seed-07", date: "2026-07-07", title: "오늘의 작은 보상", body: "바삭한 치즈와 느린 점심. 좋아하는 걸 천천히 먹은 날.", mood: "좋음", musicTitle: "Day By Day", musicArtist: "Amaria", tone: "table", favorite: false },
-  { id: "seed-15", date: "2026-07-15", title: "함께 먹는 저녁", body: "대화가 길어져서 식탁 위 불이 늦게까지 켜져 있었다.", mood: "좋음", musicTitle: "Warm Light", musicArtist: "The Paper Kites", tone: "rose", favorite: false },
-  { id: "seed-18", date: "2026-07-18", title: "새로운 책상", body: "작은 변화 하나로 방의 공기가 달라졌다.", mood: "신남", musicTitle: "Bloom", musicArtist: "RÜFÜS DU SOL", tone: "blue", favorite: false },
-  { id: "seed-23", date: "2026-07-23", title: "아이스 아메리카노", body: "오늘은 집중보다 쉬어 가는 쪽을 골랐다.", mood: "차분", musicTitle: "Home", musicArtist: "Haux", tone: "coffee", favorite: false },
-  { id: "seed-26", date: "2026-07-26", title: "구름이 예쁜 날", body: "하늘을 오래 바라보면 생각이 조금 가벼워진다.", mood: "평온", musicTitle: "Sunset Lover", musicArtist: "Petit Biscuit", tone: "dawn", favorite: true },
-  { id: "seed-30", date: "2026-07-30", title: "늦은 산책", body: "오늘 하루도 무사히 지나갔다. 그걸로 충분하다.", mood: "차분", musicTitle: "Holocene", musicArtist: "Bon Iver", tone: "night", favorite: false },
+  { id: "seed-today", date: DEFAULT_DATE, title: "", body: "", mood: "", musicTitle: "", musicArtist: "", tone: "blue", favorite: false, image: "" },
 ];
 
 const state = {
   view: "calendar",
-  month: new Date(2026, 6, 1),
+  month: new Date(now.getFullYear(), now.getMonth(), 1),
   query: "",
   sortAsc: false,
   onboardingPage: 0,
@@ -161,12 +158,12 @@ function pageTitle() {
 
 function render() {
   const storedTheme = localStorage.getItem(THEME_KEY);
-  if (storedTheme === "dark") document.body.dataset.theme = "dark";
+  if (storedTheme !== "light") document.body.dataset.theme = "dark";
   else document.body.removeAttribute("data-theme");
 
   const topbar = document.querySelector(".topbar");
   const mobileNav = document.querySelector(".mobile-nav");
-  if (localStorage.getItem(ONBOARDING_KEY) !== "complete") {
+  if (localStorage.getItem(ONBOARDING_KEY) === "show") {
     topbar.hidden = true;
     mobileNav.hidden = true;
     viewRoot.innerHTML = renderOnboarding();
@@ -174,11 +171,17 @@ function render() {
   }
   topbar.hidden = false;
   mobileNav.hidden = false;
-  document.querySelector("#page-title").textContent = pageTitle();
+  const pageTitleElement = document.querySelector("#page-title");
+  if (state.view === "calendar") {
+    const monthCode = new Intl.DateTimeFormat("en-US", { month: "short" }).format(state.month).toUpperCase();
+    pageTitleElement.innerHTML = `<span class="month-code">${monthCode}</span><small>${state.month.getFullYear()}</small>`;
+  } else {
+    pageTitleElement.textContent = pageTitle();
+  }
   searchInput.value = state.query;
   const topbarAction = document.querySelector("#topbar-action");
   if (topbarAction) {
-    topbarAction.textContent = state.view === "calendar" ? "⚙" : state.view === "feed" ? "↕" : "◐";
+    topbarAction.innerHTML = state.view === "calendar" ? '<span class="gear-glyph" aria-hidden="true">⚙</span>' : state.view === "feed" ? "↕" : "◐";
     topbarAction.setAttribute("aria-label", state.view === "calendar" ? "설정" : state.view === "feed" ? "정렬" : "테마 변경");
     topbarAction.title = topbarAction.getAttribute("aria-label");
     topbarAction.dataset.action = state.view === "feed" ? "sort-feed" : "toggle-theme";
@@ -204,45 +207,38 @@ function renderCalendar() {
   const month = state.month.getMonth();
   const firstWeekday = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const previousMonthDays = new Date(year, month, 0).getDate();
   const totalCells = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
   const today = iso(new Date());
 
   for (let index = 0; index < totalCells; index += 1) {
     const dayNumber = index - firstWeekday + 1;
-    let date;
-    let outside = false;
-    if (dayNumber < 1) {
-      date = new Date(year, month - 1, previousMonthDays + dayNumber);
-      outside = true;
-    } else if (dayNumber > daysInMonth) {
-      date = new Date(year, month + 1, dayNumber - daysInMonth);
-      outside = true;
-    } else {
-      date = new Date(year, month, dayNumber);
-    }
-    const dateValue = iso(date);
-    const entry = outside ? null : entryByDate(dateValue);
+    const outside = dayNumber < 1 || dayNumber > daysInMonth;
+    const date = outside ? null : new Date(year, month, dayNumber);
+    const dateValue = date ? iso(date) : "";
+    const entry = date ? entryByDate(dateValue) : null;
     const cellClasses = ["calendar-cell", outside ? "is-outside" : "", dateValue === today ? "is-today" : "", !outside && !entry ? "is-empty" : ""].filter(Boolean).join(" ");
     cells.push(`<div class="${cellClasses}" ${!outside && entry ? `data-entry-id="${esc(entry.id)}"` : !outside ? `data-action="create-for-date" data-date="${dateValue}"` : ""}>
-      <div class="calendar-day"><span>${date.getDate()}</span>${dateValue === today && !outside ? '<i class="today-dot"></i>' : ""}</div>
-      ${entry ? `<div class="calendar-photo" ${photoStyle(entry)}><span>${entry.mood || "오늘"}</span></div>` : ""}
+      <div class="calendar-day"><span>${date ? date.getDate() : ""}</span></div>
+      ${dateValue === today ? '<i class="today-dot"></i>' : ""}
+      ${entry?.image ? `<div class="calendar-photo" ${photoStyle(entry)}><span>${entry.mood || "오늘"}</span></div>` : ""}
     </div>`);
   }
 
-  return `<div class="view-heading">
-    <div><h2>${esc(monthLabel())}</h2><p>사진 한 장씩 쌓아가는 나의 ${state.month.getMonth() + 1}월</p></div>
-    <div class="heading-actions"><div class="month-switcher"><button data-action="previous-month" aria-label="이전 달">‹</button><span class="month-label">${esc(monthLabel())}</span><button data-action="next-month" aria-label="다음 달">›</button></div><button class="secondary-button" data-action="today">오늘</button></div>
+  const daysLabel = new Date(state.month.getFullYear(), state.month.getMonth() + 1, 0).getDate();
+  return `<div class="calendar-controls">
+    <button class="calendar-arrow" data-action="previous-month" aria-label="이전 달">‹</button>
+    <button class="secondary-button today-button" data-action="today"><span class="today-icon" aria-hidden="true"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M7 2h2v2h6V2h2v2h1a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1V2Zm11 6H6v11h12V8Z" /></svg></span>오늘</button>
+    <button class="calendar-arrow" data-action="next-month" aria-label="다음 달">›</button>
   </div>
   <div class="overview-grid">
+    <aside class="card progress-card">
+      <div class="progress-copy"><h3>이번 달 기록</h3><div class="progress-numbers"><strong>${progress.covered} / ${daysLabel}일</strong><strong class="progress-percent">${progress.percent}%</strong></div></div>
+      <div class="progress-ring" style="--progress:${progress.percent}%"></div>
+    </aside>
     <section class="card calendar-card" aria-label="${esc(monthLabel())} 달력">
       <div class="weekdays">${["일", "월", "화", "수", "목", "금", "토"].map((day) => `<span class="weekday">${day}</span>`).join("")}</div>
       <div class="calendar-grid">${cells.join("")}</div>
     </section>
-    <aside class="card progress-card">
-      <div class="progress-copy"><div><h3>이번 달 기록</h3><strong class="progress-percent">${progress.percent}%</strong></div><p>${progress.elapsed ? `${progress.covered} / ${new Date(state.month.getFullYear(), state.month.getMonth() + 1, 0).getDate()}일을 사진으로 남겼어요.` : "오늘의 사진 한 장으로 첫 기록을 시작해 보세요."}</p></div>
-      <div class="progress-ring" style="--progress:${progress.percent}%"></div>
-    </aside>
   </div>
   ${currentMonthEntries().length ? "" : emptyState("아직 이 달의 기록이 없어요", "오늘의 사진 한 장으로 첫 장면을 만들어 보세요.")}`;
 }

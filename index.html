@@ -19,21 +19,21 @@
           </div>
           <div class="topbar-actions">
             <label class="search-box" aria-label="기록 검색">
-              <span aria-hidden="true">⌕</span>
+              <span class="search-glyph" aria-hidden="true"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M10.5 4a6.5 6.5 0 1 0 4.06 11.58l4.43 4.43 1.42-1.42-4.43-4.43A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" /></svg></span>
               <input id="search-input" type="search" placeholder="기록 검색" autocomplete="off" />
             </label>
-            <button id="topbar-action" class="icon-button" data-action="toggle-theme" aria-label="설정" title="설정">⚙</button>
+            <button id="topbar-action" class="icon-button" data-action="toggle-theme" aria-label="설정" title="설정"><span class="gear-glyph" aria-hidden="true">⚙</span></button>
           </div>
         </header>
 
         <section id="view-root" class="view-root" aria-live="polite"></section>
 
         <nav class="mobile-nav" id="mobile-nav" aria-label="하단 메뉴">
-          <button class="nav-item is-active" data-view="calendar"><span class="nav-icon">▦</span><span>달력</span></button>
-          <button class="nav-item" data-view="feed"><span class="nav-icon">▤</span><span>피드</span></button>
-          <button class="nav-item nav-add" data-action="new-entry"><span class="nav-icon">＋</span><span>추가</span></button>
-          <button class="nav-item" data-view="stats"><span class="nav-icon">◔</span><span>통계</span></button>
-          <button class="nav-item" data-view="archive"><span class="nav-icon">▱</span><span>보관함</span></button>
+          <button class="nav-item is-active" data-view="calendar"><span class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M7 2h2v2h6V2h2v2h1a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1V2Zm11 6H6v11h12V8Zm-9 2h2v2H9v-2Zm4 0h2v2h-2v-2Zm-4 4h2v2H9v-2Zm4 0h2v2h-2v-2Z" /></svg></span><span>달력</span></button>
+          <button class="nav-item" data-view="feed"><span class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 4h14v3H5V4Zm0 6h14v3H5v-3Zm0 6h14v3H5v-3Z" /></svg></span><span>피드</span></button>
+          <button class="nav-item nav-add" data-action="new-entry"><span class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M11 3h2v8h8v2h-8v8h-2v-8H3v-2h8V3Z" /></svg></span><span>추가</span></button>
+          <button class="nav-item" data-view="stats"><span class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 19V9h3v10H5Zm5 0V5h3v14h-3Zm5 0v-7h3v7h-3Z" /></svg></span><span>통계</span></button>
+          <button class="nav-item" data-view="archive"><span class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 4v12h16V7H4Zm4 3h8v2H8v-2Z" /></svg></span><span>보관함</span></button>
         </nav>
       </main>
     </div>
